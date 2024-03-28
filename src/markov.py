@@ -3,6 +3,8 @@ import datetime
 import matplotlib.pyplot as plt
 import sys
 
+
+
 def categorise(x):
     if x >= 0:
         if x < 0.5:
@@ -20,18 +22,22 @@ def main():
     before_start_date = start_date - 1
     data = yf.download(symbol, start=start_date, end=date)
     
-    day_change = []
-    states = {
-        "D1" : 0,
-        "D2" : 0,
-        "D3" : 0,
-        "U1" : 0,
-        "U2": 0,
-        "U3" : 0
-    }
+
+    # states = {
+    #     "D1" : [0, 0, 0, 0, 0, 0],
+    #     "D2" : [0, 0, 0, 0, 0, 0],
+    #     "D3" : [0, 0, 0, 0, 0, 0],
+    #     "U1" : [0, 0, 0, 0, 0, 0],
+    #     "U2" : [0, 0, 0, 0, 0, 0],
+    #     "U3" : [0, 0, 0, 0, 0, 0]
+    # }
+    
+    # State matrix (divide all of the indexes by window size).
+    states = [[0] * 6] * 6
     
     i = 0
-    for delta in range((end_date - before_start_date).days + 1):
+    for delta in range((end_date - start_date).days + 1):
+        result_date = start_date + datetime.timedelta(days=delta)
         day_change.append = (data['Close'][i]- data['Open'][i]) / data['Open'][i]
         i += 1
     
