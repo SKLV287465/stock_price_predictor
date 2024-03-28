@@ -3,7 +3,6 @@
 import sys
 import yfinance as yf
 import pandas as pd
-from pandas.plotting import autocorrelation_plot
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from pmdarima.arima import auto_arima
