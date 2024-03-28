@@ -6,6 +6,7 @@ import pandas as pd
 from pandas.plotting import autocorrelation_plot
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
+from pmdarima.arima import auto_arima
 
 # Obtains the stock data for a particular ticker and time interval
 def get_stock_data(ticker, start_date, end_date):
@@ -32,13 +33,16 @@ plt.ylabel('Price')
 plt.grid(True)
 plt.show()
 
-# Fit ARIMA model --> ARIMA(p, d, q)
-model = ARIMA(data, order=(1, 1, 1))
-model_fit = model.fit()
+# Determine ARIMA parameters using auto_arima
+# p = order of autoregressive model, d = degree of differencing, q = order of moving-average model
+model = auto_arima(data, start_p=1, d=None, start_q=1, max_p=3, max_q=3, D=None, seasonal=False, trace=True)
+
+# Fit ARIMA model
+model_fit = model.fit(data)
 
 # Forecast the next {forecast_steps} days
 forecast_steps = 30
-forecast = model_fit.forecast(steps=forecast_steps)
+forecast = model_fit.predict(steps=forecast_steps)
 
 # Plot the original data and forecasted values
 plt.figure(figsize=(10, 6))
