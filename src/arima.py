@@ -34,7 +34,7 @@ plt.show()
 
 # Determine ARIMA parameters using auto_arima
 # p = order of autoregressive model, d = degree of differencing, q = order of moving-average model
-model = auto_arima(data, start_p=1, d=None, start_q=1, D=None, trace=True)
+model = auto_arima(data, start_p=1, d=None, start_q=1, max_p=3, max_q=3, D=None, seasonal=False, trace=True)
 
 # Fit ARIMA model
 model_fit = model.fit(data)
@@ -51,6 +51,7 @@ plt.title(f'ARIMA Forecast for {ticker} Stocks')
 plt.xlabel('Date')
 plt.ylabel('Price')
 plt.grid(True)
+plt.legend()
 plt.show()
 
 print("Forecasted values:")
