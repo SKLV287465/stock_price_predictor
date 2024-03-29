@@ -9,12 +9,12 @@ import markov_helper as mh
 # inputs:
 # 1: symbol
 # 2: Window size
-# 3: start date
+# 3: start day, month, year
 
 # Take in CLI arguments
 symbol = sys.argv[1]
-window = sys.argv[2]
-start_date = datetime.date(sys.argv[3])
+window = int(sys.argv[2])
+start_date = datetime.date(int(sys.argv[5]), int(sys.argv[4]), int(sys.argv[3]))
 
     # ***DEPRECATED***
     # Initialise markov matrix 
@@ -27,19 +27,20 @@ stats = [0] * 4
 # 2: true negative
 # 3: false negative
 # Fetch data
-data = mh.get_data(symbol)
-start_index = mh.daterange(datetime.date.today() - datetime.timedelta(years=5), start_date)
+data, timespan = mh.get_data(symbol)
 
-states = mh.markov_matrix(data, start_index - 1, window)
-for i in range(mh.daterange(start_date, datetime.date.today())):
+current_date = 1
+states = mh.markov_matrix(data, current_date, window)
+
+for i in range(1, timespan):
     previous = mh.get_categorised(data, current_date - 1)
     now = mh.get_categorised(data, current_date)
     stats[mh.get_stat(states, previous, now)] += 1
     
     states = mh.markov_matrix(data, current_date, window) 
-    current_date = start_index + i
+    current_date += 1
     
 accuracy, precision, recall = mh.statcalc(stats)
-print('Accuracy: ' + accuracy)
-print('Accuracy: ' + precision)
-print('Accuracy: ' + recall)
+print('Accuracy: ' + str(accuracy))
+print('Precision: ' + str(precision))
+print('Recall: ' + str(recall))
