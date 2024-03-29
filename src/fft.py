@@ -20,8 +20,8 @@ plt.plot(np.asarray(data_FT['Close'].tolist()),  label='Real')
 for num_ in [3, 6, 9]:
     fft_list_m10= np.copy(close_fft); fft_list_m10[num_:-num_]=0
     plt.plot(np.fft.ifft(fft_list_m10), label='Fourier transform with {} components'.format(num_))
-plt.xlabel('Days')
-plt.ylabel('USD')
-plt.title('Tesla (close) stock prices & Fourier transforms')
-plt.legend()
+plt.xlabel('Days', fontsize=20)
+plt.ylabel('USD', fontsize=20)
+plt.title('Tesla (close) stock prices & Fourier transforms', fontsize=20)
+plt.legend(fontsize=15)
 plt.show()
