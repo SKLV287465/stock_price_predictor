@@ -6,7 +6,7 @@ import sys
 import scraper
 
 symbol = "TSLA"
-poly_degree = 3
+poly_degree = 1
 
 # e.g. run 'python3 fft.py TSLA max 5'
 
@@ -82,12 +82,11 @@ def show():
 
 if __name__ == '__main__':
     testdata = scraper.test_extrapolationToday(symbol,200, 60)
-    data = scraper.get_last(symbol, 365)
     plt.figure(figsize=(14, 7), dpi=100)
     plt.plot(np.asarray(testdata[1]['Close'].tolist()),  label='Real')
     transforms = calculate_fourier_transform(testdata[0])
     polynomials = calculate_polynomial_fit(transforms, poly_degree)
-    plot_polynomial(polynomials, 0, len(data))
+    plot_polynomial(polynomials, 0, len(testdata[1]))
 
 
     show()
