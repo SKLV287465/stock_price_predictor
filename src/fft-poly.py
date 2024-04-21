@@ -11,8 +11,7 @@ poly_degree = 3
 
 # Calculate the Fourier Transform
 def calculate_fourier_transform(data, num_components):
-    closeData = data[['Close']]
-    fft = np.fft.fft(np.asarray(closeData['Close'].tolist()))
+    fft = np.fft.fft(np.asarray(data))
 
     fft_intermediete = np.copy(fft)
     fft_intermediete[num_components:-num_components] = 0
@@ -63,16 +62,20 @@ def show():
     plt.legend()
     plt.show()
 
-def extrapolate(data, num_days, degree):
+def extrapolate(data, num_days, degree = 1, num_components = 0):
     n = data.size
     size =  n + num_days
     trend_polynomial = calculate_polynomial_fit(data, degree)
-
+    detrended_data = np.zeros(n)
+    for i in range(n):
+        detrended_data[i] = data[i] - trend_polynomial(i)
+    if num_components > 0:
+        detrended_data = calculate_fourier_transform(detrended_data, 50)
     new_data = np.zeros(size)
 
     # Calculate new data
     for i in range(size):
-        new_data[i] = data[i % n] - trend_polynomial(i % n) + trend_polynomial(i)
+        new_data[i] = detrended_data[i % n] + trend_polynomial(i)
     return new_data
 
 def extrapolate_predict(data,degree, num_day, look_ahead):
@@ -93,14 +96,14 @@ def extrapolate_predict_next_day(data, num_day,degree):
 #   is incompatible with what is being suggested in the other two sources
 
 if __name__ == '__main__':
-    reduced, actual = scraper.test_extrapolationToday(symbol,100, 20)
+    reduced, actual = scraper.test_extrapolationToday(symbol,300, 40)
     plt.figure(figsize=(14, 7), dpi=100)
     plt.plot(np.asarray(actual['Close'].tolist()),  label='Real')
     # Account for weekend non trading days
     data = reduced['Close']
     extrapolation = extrapolate(data, len(actual) - len(reduced), 1)
     plt.plot(np.arange(0, extrapolation.size), extrapolation, 'r', label='Projection', linewidth=1)
-    transform = calculate_fourier_transform(reduced, 3)
+    transform = calculate_fourier_transform(reduced['Close'], 3)
     polynomials = calculate_polynomial_fit(transform, poly_degree)
     # plot_polynomial(polynomials, 0, len(testdata[1]))
 
