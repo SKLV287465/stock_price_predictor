@@ -6,12 +6,16 @@ import fft_poly;
 import datetime;
 import sys
 import math
+import matplotlib.pyplot as plt
 
 symbol = sys.argv[1]
 window = int(sys.argv[2])
 start_date = datetime.date(int(sys.argv[5]), int(sys.argv[4]), int(sys.argv[3]))
 money = int(sys.argv[6])
 
+stock_plot_data = []
+fft_plot_data = []
+markov_plot_data = []
 # helper functions
 def sell(stocks, data, index):
     return float(data['Close'][index]) * stocks
@@ -22,7 +26,8 @@ def buy(money, data, index):
     return int(bought_stocks), float(leftover)
 
 # markov model with fft
-def with_fft(money):
+def with_fft(money, plot, splot):
+    plot_data = []
     data, timespan = mh.get_data_start_date(symbol, start_date)
     current_date = 1
     states = mh.markov_matrix(data, current_date, window)
@@ -39,10 +44,13 @@ def with_fft(money):
             money += newmon
             stocks = 0
         current_date += 1
+        plot.append(money + (stocks * data['Close'][i]))
+        splot.append(initialbuy * data['Close'][i])
     return (money + (stocks * data['Close'][timespan - 1])) - (initialbuy *data['Close'][timespan - 1])
 
 # markov model without fft
-def without(money):
+def without(money, plot):
+    plot_data = []
     data, timespan = mh.get_data_start_date(symbol, start_date)
     current_date = 1
     states = mh.markov_matrix(data, current_date, window)
@@ -58,9 +66,24 @@ def without(money):
             money += newmon
             stocks = 0
         current_date += 1
+        plot.append(money + (stocks * data['Close'][i]))
     return (money + (stocks * data['Close'][timespan - 1])) - (initialbuy *data['Close'][timespan - 1])
 
-money = without(money)
+
+money = without(money, plot=markov_plot_data)
 print("profit made with pure markov: " + str(money))
-money = with_fft(money)
-print("profit made with pure markov: " + str(money))
+money = with_fft(money, fft_plot_data, stock_plot_data)
+print("profit made with fft: " + str(money))
+
+stock_plot_data.plot()
+fft_plot_data.plot()
+markov_plot_data.plot()
+plt.plot(stock_plot_data, color='r', label='market')
+plt.plot(fft_plot_data, color='g', label='with fft')
+plt.plot(markov_plot_data, color='b', label='markov')
+
+plt.xlabel("Days Since Start") 
+plt.ylabel("Total Money") 
+plt.title("Market vs FFT/Markov vs Markov")
+plt.legend() 
+plt.show() 
