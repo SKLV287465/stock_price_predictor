@@ -70,7 +70,7 @@ def extrapolate(data, num_days, degree = 1, num_components = 0):
     for i in range(n):
         detrended_data[i] = data[i] - trend_polynomial(i)
     if num_components > 0:
-        detrended_data = calculate_fourier_transform(detrended_data, 50)
+        detrended_data = calculate_fourier_transform(detrended_data, num_components)
     new_data = np.zeros(size)
 
     # Calculate new data
