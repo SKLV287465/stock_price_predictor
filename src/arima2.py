@@ -3,7 +3,6 @@
 import sys
 import yfinance as yf
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import r2_score
@@ -42,20 +41,20 @@ while result[0] > 0.05:
     result = adf_test.should_diff(df_diff)
     print(result[0])
 
-df.shape
-train_size = int(0.8 * len(df))
-# train - selects the bottom 80% of the data using slicing.
+actual_data_size = int(0.8 * len(df))
+# actual - selects the bottom 80% of the data using slicing.
 # test - selects the last 20% of the data using slicing.
-train = df[:train_size]
-test = df[train_size:]
-plt.plot(train)
+actual = df[:actual_data_size]
+test = df[actual_data_size:]
+plt.plot(actual)
 plt.plot(test)
 plt.show()
 
-train.index = pd.date_range(start=start_date, periods=len(train))
-test.index = pd.date_range(start=train.index[-1] + pd.Timedelta(days=1), periods=len(test))
+actual.index = pd.date_range(start=start_date, periods=len(actual))
+test.index = pd.date_range(start=actual.index[-1] + pd.Timedelta(days=1), periods=len(test))
 
-model=auto_arima(train, start_p = 0, d = differencing, start_q = 0,
+# Fit the data to the ARIMA model, using the differencing parameter determined
+model=auto_arima(actual, start_p = 0, d = differencing, start_q = 0,
           max_p = 5, max_d = differencing, max_q = 5, start_P = 0,
           D = 1, start_Q = 0, max_P = 5, max_D = 5,
           max_Q = 5, m = 12, seasonal = True, trace = True,
@@ -63,11 +62,12 @@ model=auto_arima(train, start_p = 0, d = differencing, start_q = 0,
 
 prediction = pd.DataFrame(model.predict(n_periods=len(test)), index=test.index, columns=['Predicted'])
 
-plt.plot(train, label = "Training")
+plt.plot(actual, label = "Actual")
 plt.plot(test, label = "Test")
 plt.plot(prediction, label = "Predicted")
 plt.legend(loc = 'upper left')
 plt.show()
 
+# Calcuate the r-sqared value of the test data compared to the predicted data
 r2 = r2_score(test, prediction)
 print(r2)
