@@ -2,7 +2,7 @@
 # the arguments are for the start, program runs until present day
 import markov.markov_helper as mh;
 # import arima;
-import
+import fft_poly;
 import datetime;
 import sys
 import math
@@ -22,7 +22,7 @@ def buy(money, data, index):
     return int(bought_stocks), float(leftover)
 
 # markov model with fft
-def with_fft():
+def with_fft(money):
     data, timespan = mh.get_data_start_date(symbol, start_date)
     current_date = 1
     states = mh.markov_matrix(data, current_date, window)
@@ -30,10 +30,11 @@ def with_fft():
     initialbuy = math.floor(money / data["Close"][1])
     for i in range(1, timespan):
         now = mh.get_categorised(data, current_date)
-        if (now > 2):
+        diff = fft_poly.extrapolate_predict_next_day(data['Close'], i, 1, 0)
+        if (now > 2 and diff >= 0):
             new, money = buy(money, data, i)
             stocks += new
-        else:
+        elif (diff < 0):
             newmon = sell(stocks, data, i)
             money += newmon
             stocks = 0
@@ -60,4 +61,6 @@ def without(money):
     return (money + (stocks * data['Close'][timespan - 1])) - (initialbuy *data['Close'][timespan - 1])
 
 money = without(money)
+print("profit made with pure markov: " + str(money))
+money = with_fft(money)
 print("profit made with pure markov: " + str(money))
