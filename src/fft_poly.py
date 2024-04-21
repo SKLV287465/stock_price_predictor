@@ -24,7 +24,7 @@ def calculate_polynomial_fit(data, poly_degree):
 
     y_vals = data
     z = np.polyfit(x_vals, y_vals, poly_degree)
-    return  np.poly1d(z)
+    return np.poly1d(z)
 
         # plots points of the extrapolated polynomial
         # first arg is starting x-coordinate
@@ -49,8 +49,8 @@ def polynomial_predict(f, day):
 def predict_next_day(data, num_days):
     data = data[0:num_days]
     transforms = calculate_fourier_transform(data)
-    polynomials = calculate_polynomial_fit(transforms, poly_degree)
-    return polynomials[0](num_days + 1) - polynomials[0](num_days)
+    polynomial = calculate_polynomial_fit(transforms, poly_degree)
+    return polynomial(num_days + 1) - polynomial(num_days)
 
 
 def show():
@@ -79,12 +79,13 @@ def extrapolate(data, num_days, degree = 1, num_components = 0):
     return new_data
 
 def extrapolate_predict(data,degree, num_day, look_ahead, num_components = 0):
+
     data = data[0:num_day]
     extrapolation = extrapolate(data, look_ahead, degree, num_components)
     return extrapolation[num_day + look_ahead - 1] - extrapolation[num_day-1]
 
 def extrapolate_predict_next_day(data, num_day,degree = 1, num_components = 0):
-    return extrapolate_predict(data, num_day,degree, 1, num_components)
+    return extrapolate_predict(data, degree, num_day, 1, num_components)
 # notes:
 # 
 # - realistically not a feasible method of making accurate predictions
