@@ -5,41 +5,26 @@ from matplotlib import pyplot as plt
 import sys
 import scraper
 
+
 symbol = "TSLA"
-poly_degree = 1
-
-# e.g. run 'python3 fft.py TSLA max 5'
-
-
-data = scraper.get_all_data(symbol)
+poly_degree = 3
 
 # Calculate the Fourier Transform
-def calculate_fourier_transform(data):
-    closeData = data[['Close']]
-    fft = np.fft.fft(np.asarray(closeData['Close'].tolist()))
+def calculate_fourier_transform(data, num_components):
+    fft = np.fft.fft(np.asarray(data))
 
-    transforms = []
+    fft_intermediete = np.copy(fft)
+    fft_intermediete[num_components:-num_components] = 0
+    return np.fft.ifft(fft_intermediete)
 
-    for n in [3, 6, 9]:
-        fft_intermediete = np.copy(fft)
-        fft_intermediete[n:-n] = 0
-        transform = plt.plot(np.fft.ifft(fft_intermediete), label='Fourier transform with {} components'.format(n))
-        # save the matplotlib object for later extrapolation
-        transforms.append(transform[0])
-    return transforms
-def generate_polynomial_fit(data):
-    return plt
-def calculate_polynomial_fit(transforms, poly_degree):
+def calculate_polynomial_fit(data, poly_degree):
     # Extrapolate predicted polynomials on the Fourier Transforms
-    polynomials = []
 
-    for transform in transforms:
-        x_vals = transform.get_data()[0]
-        y_vals = transform.get_data()[1]
-        z = np.polyfit(x_vals, y_vals, poly_degree)
-        f = np.poly1d(z)
-        polynomials.append(f)
-    return polynomials
+    x_vals = np.arange(0, data.size)
+
+    y_vals = data
+    z = np.polyfit(x_vals, y_vals, poly_degree)
+    return  np.poly1d(z)
 
         # plots points of the extrapolated polynomial
         # first arg is starting x-coordinate
@@ -61,6 +46,13 @@ def plot_polynomial(polynomials, start, extrapolation):
 def polynomial_predict(f, day):
     return f(day) - f(day - 1)
 
+def predict_next_day(data, num_days):
+    data = data[0:num_days]
+    transforms = calculate_fourier_transform(data)
+    polynomials = calculate_polynomial_fit(transforms, poly_degree)
+    return polynomials[0](num_days + 1) - polynomials[0](num_days)
+
+
 def show():
     plt.style.use('ggplot')
     plt.xlabel('Days')
@@ -70,6 +62,29 @@ def show():
     plt.legend()
     plt.show()
 
+def extrapolate(data, num_days, degree = 1, num_components = 0):
+    n = data.size
+    size =  n + num_days
+    trend_polynomial = calculate_polynomial_fit(data, degree)
+    detrended_data = np.zeros(n)
+    for i in range(n):
+        detrended_data[i] = data[i] - trend_polynomial(i)
+    if num_components > 0:
+        detrended_data = calculate_fourier_transform(detrended_data, 50)
+    new_data = np.zeros(size)
+
+    # Calculate new data
+    for i in range(size):
+        new_data[i] = detrended_data[i % n] + trend_polynomial(i)
+    return new_data
+
+def extrapolate_predict(data,degree, num_day, look_ahead, num_components = 0):
+    data = data[0:num_day]
+    extrapolation = extrapolate(data, look_ahead, degree, num_components)
+    return extrapolation[num_day + look_ahead - 1] - extrapolation[num_day-1]
+
+def extrapolate_predict_next_day(data, num_day,degree = 1, num_components = 0):
+    return extrapolate_predict(data, num_day,degree, 1, num_components)
 # notes:
 # 
 # - realistically not a feasible method of making accurate predictions
@@ -81,12 +96,16 @@ def show():
 #   is incompatible with what is being suggested in the other two sources
 
 if __name__ == '__main__':
-    testdata = scraper.test_extrapolationToday(symbol,200, 60)
+    reduced, actual = scraper.test_extrapolationToday(symbol,300, 40)
     plt.figure(figsize=(14, 7), dpi=100)
-    plt.plot(np.asarray(testdata[1]['Close'].tolist()),  label='Real')
-    transforms = calculate_fourier_transform(testdata[0])
-    polynomials = calculate_polynomial_fit(transforms, poly_degree)
-    plot_polynomial(polynomials, 0, len(testdata[1]))
+    plt.plot(np.asarray(actual['Close'].tolist()),  label='Real')
+    # Account for weekend non trading days
+    data = reduced['Close']
+    extrapolation = extrapolate(data, len(actual) - len(reduced), 1)
+    plt.plot(np.arange(0, extrapolation.size), extrapolation, 'r', label='Projection', linewidth=1)
+    transform = calculate_fourier_transform(reduced['Close'], 3)
+    polynomials = calculate_polynomial_fit(transform, poly_degree)
+    # plot_polynomial(polynomials, 0, len(testdata[1]))
 
 
     show()
