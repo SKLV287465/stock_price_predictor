@@ -1,11 +1,14 @@
 import yfinance as yf
 import datetime
-import math
 
 
 # Gets data from start_date to current date 
 def get_data(symbol):
     data = yf.download(symbol, start=(datetime.date.today() -  datetime.timedelta(days=1826)), end=datetime.date.today())
+    return data, len(data)
+
+def get_data_start_date(symbol, start_date):
+    data = yf.download(symbol, start=start_date, end=datetime.date.today())
     return data, len(data)
     
 # Categorises the stock prices 
