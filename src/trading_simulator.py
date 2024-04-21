@@ -28,10 +28,12 @@ def buy(money, data, index):
 # markov model with fft
 def with_fft(money, plot, splot):
     data, timespan = mh.get_data_start_date(symbol, start_date)
-    current_date = 1
+    current_date = 2
     states = mh.markov_matrix(data, current_date, window)
     stocks = 0
-    initialbuy = math.floor(money / data["Close"][1])
+    initialbuy = math.floor(money / data["Close"][2])
+    plot.append(5000)
+    splot.append(5000)
     for i in range(2, timespan):
         now = mh.get_categorised(data, current_date)
         diff = fft_poly.extrapolate_predict_next_day(data['Close'], i)
@@ -70,6 +72,7 @@ def without(money, plot):
 
 money = without(money, plot=markov_plot_data)
 print("profit made with pure markov: " + str(money))
+money = int(sys.argv[6])
 money = with_fft(money, fft_plot_data, stock_plot_data)
 print("profit made with fft: " + str(money))
 
