@@ -28,9 +28,9 @@ def with_fft(money):
     states = mh.markov_matrix(data, current_date, window)
     stocks = 0
     initialbuy = math.floor(money / data["Close"][1])
-    for i in range(1, timespan):
+    for i in range(2, timespan):
         now = mh.get_categorised(data, current_date)
-        diff = fft_poly.extrapolate_predict_next_day(data['Close'], i, 1, 0)
+        diff = fft_poly.extrapolate_predict_next_day(data['Close'], i)
         if (now > 2 and diff >= 0):
             new, money = buy(money, data, i)
             stocks += new
