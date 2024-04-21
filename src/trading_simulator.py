@@ -27,7 +27,6 @@ def buy(money, data, index):
 
 # markov model with fft
 def with_fft(money, plot, splot):
-    plot_data = []
     data, timespan = mh.get_data_start_date(symbol, start_date)
     current_date = 1
     states = mh.markov_matrix(data, current_date, window)
@@ -50,7 +49,6 @@ def with_fft(money, plot, splot):
 
 # markov model without fft
 def without(money, plot):
-    plot_data = []
     data, timespan = mh.get_data_start_date(symbol, start_date)
     current_date = 1
     states = mh.markov_matrix(data, current_date, window)
@@ -75,9 +73,10 @@ print("profit made with pure markov: " + str(money))
 money = with_fft(money, fft_plot_data, stock_plot_data)
 print("profit made with fft: " + str(money))
 
+plt.plot(markov_plot_data, color='b', label='markov')
 plt.plot(stock_plot_data, color='r', label='market')
 plt.plot(fft_plot_data, color='g', label='with fft')
-plt.plot(markov_plot_data, color='b', label='markov')
+
 
 plt.xlabel("Days Since Start") 
 plt.ylabel("Total Money") 
