@@ -78,13 +78,13 @@ def extrapolate(data, num_days, degree = 1, num_components = 0):
         new_data[i] = detrended_data[i % n] + trend_polynomial(i)
     return new_data
 
-def extrapolate_predict(data,degree, num_day, look_ahead):
+def extrapolate_predict(data,degree, num_day, look_ahead, num_components = 0):
     data = data[0:num_day]
-    extrapolation = extrapolate(data, look_ahead, degree)
+    extrapolation = extrapolate(data, look_ahead, degree, num_components)
     return extrapolation[num_day + look_ahead - 1] - extrapolation[num_day-1]
 
-def extrapolate_predict_next_day(data, num_day,degree):
-    return extrapolate_predict(data, num_day,degree, 1)
+def extrapolate_predict_next_day(data, num_day,degree = 1, num_components = 0):
+    return extrapolate_predict(data, num_day,degree, 1, num_components)
 # notes:
 # 
 # - realistically not a feasible method of making accurate predictions
